@@ -38,6 +38,7 @@ def whats_new(session):
         )
     return results
 
+
 def latest_versions(session):
     response = get_response(session, MAIN_DOC_URL)
     if response is None:
@@ -66,6 +67,7 @@ def latest_versions(session):
         )
     return results
 
+
 def download(session):
     downloads_url = urljoin(MAIN_DOC_URL, 'download.html')
     response = get_response(session, downloads_url)
@@ -74,7 +76,9 @@ def download(session):
     soup = BeautifulSoup(response.text, 'lxml')
     main_tag = find_tag(soup, 'div', attrs={'role': 'main'})
     table_tag = find_tag(main_tag, 'table', attrs={'class': 'docutils'})
-    pdf_a4_tag = find_tag(table_tag, 'a', attrs={'href': re.compile(r'.+pdf-a4\.zip$')})
+    pdf_a4_tag = find_tag(
+        table_tag, 'a', attrs={'href': re.compile(r'.+pdf-a4\.zip$')}
+    )
     pdf_a4_link = pdf_a4_tag['href']
     archive_url = urljoin(downloads_url, pdf_a4_link)
     filename = archive_url.split('/')[-1]
@@ -85,6 +89,7 @@ def download(session):
     with open(archive_path, 'wb') as file:
         file.write(response.content)
     logging.info(f'Archive was downloaded and saved: {archive_path}')
+
 
 def pep(session):
     COUNT_ALL_STATUS = {
@@ -105,7 +110,9 @@ def pep(session):
     if response is None:
         return
     soup = BeautifulSoup(response.text, features='lxml')
-    pep_table = find_tag(soup, 'section', attrs={'id': 'numerical-index'}).find('table')
+    pep_table = find_tag(
+        soup, 'section', attrs={'id': 'numerical-index'}
+    ).find('table')
     rows = pep_table.find_all('tr')[1:]
     for row in tqdm(rows):
         cols = row.find_all('td')
