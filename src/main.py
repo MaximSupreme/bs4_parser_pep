@@ -93,16 +93,16 @@ def download(session):
 
 def pep(session):
     COUNT_ALL_STATUS = {
-    'Active': 0,
-    'Accepted': 0,
-    'Deferred': 0,
-    'Draft': 0,
-    'Final': 0,
-    'Provisional': 0,
-    'Rejected': 0,
-    'Superseded': 0,
-    'Withdrawn': 0,
-}
+        'Active': 0,
+        'Accepted': 0,
+        'Deferred': 0,
+        'Draft': 0,
+        'Final': 0,
+        'Provisional': 0,
+        'Rejected': 0,
+        'Superseded': 0,
+        'Withdrawn': 0,
+    }
     total_peps = 0
     pep_url = urljoin(PEP_URL, 'numerical/')
     results = [('Статус', 'Количество')]
@@ -137,6 +137,7 @@ def pep(session):
             total_peps += 1
     results.append(('Total', total_peps))
     return results
+
 
 MODE_TO_FUNCTION = {
     'whats-new': whats_new,
