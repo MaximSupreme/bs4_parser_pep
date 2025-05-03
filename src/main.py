@@ -18,9 +18,15 @@ def whats_new(session):
     if response is None:
         return
     soup = BeautifulSoup(response.text, features='lxml')
-    main_div = find_tag(soup, 'section', attrs={'id': 'what-s-new-in-python'})
-    div_with_ul = find_tag(main_div, 'div', attrs={'class': 'toctree-wrapper'})
-    sections_by_python = div_with_ul.find_all('li', attrs={'class': 'toctree-l1'})
+    main_div = find_tag(
+        soup, 'section', attrs={'id': 'what-s-new-in-python'}
+    )
+    div_with_ul = find_tag(
+        main_div, 'div', attrs={'class': 'toctree-wrapper'}
+    )
+    sections_by_python = div_with_ul.find_all(
+        'li', attrs={'class': 'toctree-l1'}
+    )
     results = [('Ссылка на статью', 'Заголовок', 'Редактор, автор')]
     for section in tqdm(sections_by_python):
         version_a_tag = section.find('a')
@@ -44,7 +50,9 @@ def latest_versions(session):
     if response is None:
         return
     soup = BeautifulSoup(response.text, 'lxml')
-    sidebar = find_tag(soup, 'div', attrs={'class': 'sphinxsidebarwrapper'})
+    sidebar = find_tag(
+        soup, 'div', attrs={'class': 'sphinxsidebarwrapper'}
+    )
     ul_tags = sidebar.find_all('ul')
     for ul in ul_tags:
         if 'All versions' in ul.text:
@@ -75,7 +83,9 @@ def download(session):
         return
     soup = BeautifulSoup(response.text, 'lxml')
     main_tag = find_tag(soup, 'div', attrs={'role': 'main'})
-    table_tag = find_tag(main_tag, 'table', attrs={'class': 'docutils'})
+    table_tag = find_tag(
+        main_tag, 'table', attrs={'class': 'docutils'}
+    )
     pdf_a4_tag = find_tag(
         table_tag, 'a', attrs={'href': re.compile(r'.+pdf-a4\.zip$')}
     )
