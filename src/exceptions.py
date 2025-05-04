@@ -4,5 +4,8 @@ class ParserFindTagException(Exception):
 
 
 class VersionListNotFoundError(Exception):
-    """Вызывается, когда парсер не может найти список версий Python в документации."""
+    """
+    Вызывается, когда парсер не может найти
+    список версий Python в документации.
+    """
     pass
