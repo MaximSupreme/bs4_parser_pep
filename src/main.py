@@ -136,6 +136,7 @@ def pep(session):
             total_peps += 1
     for message in logger_messages:
         logging.info(message)
+    results.extend(count_all_status.items())
     results.append(('Total', total_peps))
     return results
 
