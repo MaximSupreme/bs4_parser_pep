@@ -9,15 +9,13 @@ from tqdm import tqdm
 from configs import configure_argument_parser, configure_logging
 from constants import BASE_DIR, MAIN_DOC_URL, PEP_URL
 from outputs import control_output
-from utils import find_tag, get_response
+from utils import find_tag, get_response, get_parsed_page
+from exceptions import VersionListNotFoundError
 
 
 def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
-    response = get_response(session, whats_new_url)
-    if response is None:
-        return
-    soup = BeautifulSoup(response.text, features='lxml')
+    soup = get_parsed_page(session, whats_new_url)
     main_div = find_tag(
         soup, 'section', attrs={'id': 'what-s-new-in-python'}
     )
@@ -46,10 +44,7 @@ def whats_new(session):
 
 
 def latest_versions(session):
-    response = get_response(session, MAIN_DOC_URL)
-    if response is None:
-        return
-    soup = BeautifulSoup(response.text, 'lxml')
+    soup = get_parsed_page(session, MAIN_DOC_URL)
     sidebar = find_tag(
         soup, 'div', attrs={'class': 'sphinxsidebarwrapper'}
     )
@@ -59,12 +54,11 @@ def latest_versions(session):
             a_tags = ul.find_all('a')
             break
     else:
-        raise Exception('Не найден список c версиями Python')
+        raise VersionListNotFoundError('Не найден список с версиями Python.')
     results = [('Ссылка на документацию', 'Версия', 'Статус')]
     pattern = r'Python (?P<version>\d\.\d+) \((?P<status>.*)\)'
     for a_tag in a_tags:
         link = a_tag['href']
-        # print(a_tag.text)
         text_match = re.search(pattern, a_tag.text)
         if text_match is not None:
             version, status = text_match.groups()
@@ -78,10 +72,7 @@ def latest_versions(session):
 
 def download(session):
     downloads_url = urljoin(MAIN_DOC_URL, 'download.html')
-    response = get_response(session, downloads_url)
-    if response is None:
-        return
-    soup = BeautifulSoup(response.text, 'lxml')
+    soup = get_parsed_page(session, downloads_url)
     main_tag = find_tag(soup, 'div', attrs={'role': 'main'})
     table_tag = find_tag(
         main_tag, 'table', attrs={'class': 'docutils'}
@@ -102,7 +93,7 @@ def download(session):
 
 
 def pep(session):
-    COUNT_ALL_STATUS = {
+    count_all_status = {
         'Active': 0,
         'Accepted': 0,
         'Deferred': 0,
@@ -116,10 +107,8 @@ def pep(session):
     total_peps = 0
     pep_url = urljoin(PEP_URL, 'numerical/')
     results = [('Статус', 'Количество')]
-    response = get_response(session, pep_url)
-    if response is None:
-        return
-    soup = BeautifulSoup(response.text, features='lxml')
+    logger_messages = []
+    soup = get_parsed_page(session, pep_url)
     pep_table = find_tag(
         soup, 'section', attrs={'id': 'numerical-index'}
     ).find('table')
@@ -136,15 +125,17 @@ def pep(session):
         table = soup.find('section', {'id': 'pep-content'}).find('dl')
         status = table.find('abbr').text
         if pep_list_status != status:
-            logging.info(
+            logger_messages.append(
                 f'Несовпадающие статусы:\n'
                 f'{pep_page_url}\n'
                 f'Статус в карточке: {status}\n'
                 f'Ожидаемые статусы: ["{pep_list_status}"]'
             )
-        if status in COUNT_ALL_STATUS:
-            COUNT_ALL_STATUS[status] += 1
+        if status in count_all_status:
+            count_all_status[status] += 1
             total_peps += 1
+    for message in logger_messages:
+        logging.info(message)
     results.append(('Total', total_peps))
     return results
 
