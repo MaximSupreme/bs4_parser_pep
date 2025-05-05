@@ -30,10 +30,7 @@ def whats_new(session):
         version_a_tag = section.find('a')
         href = version_a_tag['href']
         version_link = urljoin(whats_new_url, href)
-        response = get_response(session, version_link)
-        if response is None:
-            return
-        soup = BeautifulSoup(response.text, 'lxml')
+        soup = get_parsed_page(session, version_link)
         h1 = find_tag(soup, 'h1')
         dl = find_tag(soup, 'dl')
         dl_text = dl.text.replace('\n', ' ')
@@ -118,10 +115,7 @@ def pep(session):
         pep_list_status = cols[0].find('abbr')['title'].split(', ')[1:][0]
         href = cols[1].find('a')['href'][3:]
         pep_page_url = urljoin(PEP_URL, href)
-        response = get_response(session, pep_page_url)
-        if response is None:
-            return
-        soup = BeautifulSoup(response.text, features='lxml')
+        soup = get_parsed_page(session, pep_page_url)
         table = soup.find('section', {'id': 'pep-content'}).find('dl')
         status = table.find('abbr').text
         if pep_list_status != status:
